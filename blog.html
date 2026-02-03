@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UN Voting Analysis Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --bg-2: #ffffff;
+        --bg-3: #eceff3;
+        --text: #1b1f2a;
+        --muted: #4f5b6e;
+        --accent: #0f4c81;
+        --accent-2: #496b8a;
+        --card: #ffffff;
+        --card-border: rgba(15, 76, 129, 0.12);
+        --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        --ink: #0a1018;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
+        color: var(--text);
+        font-family: "Newsreader", serif;
+        min-height: 100vh;
+      }
+
+      header {
+        padding: 56px 12vw 28px;
+        display: grid;
+        gap: 16px;
+        background: var(--bg-2);
+        border-bottom: 1px solid rgba(27, 31, 42, 0.08);
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        font-size: 0.7rem;
+        color: var(--accent);
+        font-weight: 600;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Newsreader", serif;
+        font-weight: 600;
+        font-size: clamp(2.1rem, 3vw, 3.2rem);
+      }
+
+      header p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 760px;
+        font-size: 1.02rem;
+        line-height: 1.7;
+      }
+
+      .byline {
+        margin: 0;
+        font-size: 0.92rem;
+        color: var(--accent-2);
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .controls {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .summary {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      .summary-card {
+        background: var(--bg-2);
+        border: 1px solid rgba(27, 31, 42, 0.08);
+        border-radius: 12px;
+        padding: 12px 14px;
+        box-shadow: var(--shadow);
+      }
+
+      .summary-card h4 {
+        margin: 0 0 6px;
+        font-size: 0.92rem;
+        color: var(--accent);
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .summary-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.55;
+      }
+
+      .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .pill-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill {
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 76, 129, 0.2);
+        background: #ffffff;
+        color: var(--text);
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .pill.active,
+      .pill:hover {
+        background: rgba(15, 76, 129, 0.08);
+        border-color: rgba(15, 76, 129, 0.45);
+      }
+
+      main {
+        padding: 24px 12vw 80px;
+        display: grid;
+        gap: 28px;
+      }
+
+      .intro {
+        display: grid;
+        gap: 14px;
+        max-width: 900px;
+      }
+
+      .intro h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .intro p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        padding: 16px 16px 14px;
+        display: grid;
+        gap: 10px;
+        box-shadow: var(--shadow);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(15, 76, 129, 0.3);
+      }
+
+      .card h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .card button {
+        margin-top: auto;
+        align-self: start;
+        padding: 9px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(15, 76, 129, 0.25);
+        background: #f5f8fc;
+        color: var(--accent);
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .card button:hover {
+        transform: translateY(-1px);
+        background: #eaf1f9;
+      }
+
+      .viewer {
+        background: var(--bg-2);
+        border: 1px solid rgba(27, 31, 42, 0.1);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        display: grid;
+        gap: 16px;
+      }
+
+      .viewer-body {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr);
+        align-items: start;
+      }
+
+      .viewer-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .viewer h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .viewer iframe {
+        width: 100%;
+        height: min(72vh, 720px);
+        border: none;
+        border-radius: 12px;
+        background: #ffffff;
+        border: 1px solid rgba(27, 31, 42, 0.08);
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .badge {
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: rgba(15, 76, 129, 0.08);
+        color: var(--accent);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .insight-panel {
+        background: #fbfcfe;
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid rgba(27, 31, 42, 0.08);
+        display: grid;
+        gap: 12px;
+      }
+
+      .insight-panel h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .insight-panel h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--accent-2);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .insight-panel p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.98rem;
+        line-height: 1.7;
+      }
+
+      .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .action-button {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(15, 76, 129, 0.25);
+        background: #f5f8fc;
+        color: var(--accent);
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .action-button:hover {
+        transform: translateY(-1px);
+        background: #eaf1f9;
+      }
+
+      .conclusion {
+        background: var(--bg-2);
+        border: 1px solid rgba(27, 31, 42, 0.1);
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        display: none;
+        gap: 10px;
+      }
+
+      .conclusion.active {
+        display: grid;
+      }
+
+      .conclusion h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+      }
+
+      .conclusion p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .conclusion-toggle.pill {
+        padding: 8px 12px;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease both;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 720px) {
+        header {
+          padding-top: 32px;
+          padding-left: 7vw;
+          padding-right: 7vw;
+        }
+
+        .viewer-body {
+          grid-template-columns: 1fr;
+        }
+
+        .viewer iframe {
+          height: 420px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="eyebrow">UN Voting Blog</div>
+      <h1>Explaining UN General Assembly voting patterns through interactive analysis.</h1>
+      <p class="byline">Krishna Chaitanya Chivukula</p>
+      <p>
+        This blog-style report documents the insights behind each visualization, providing clear
+        explanations and key questions that help interpret the data for mentors and reviewers.
+      </p>
+      <div class="summary">
+        <div class="summary-card">
+          <h4>Scope</h4>
+          <p>12 interactive views spanning ideology, alignment, polarization, and temporal dynamics.</p>
+        </div>
+        <div class="summary-card">
+          <h4>Audience</h4>
+          <p>Mentors and reviewers who need a disciplined narrative alongside each visualization.</p>
+        </div>
+        <div class="summary-card">
+          <h4>How to read</h4>
+          <p>Start with the explanation, then explore the interactive plot for evidence and detail.</p>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="filters">
+          <div class="pill-group" id="tagFilters"></div>
+          <button class="pill conclusion-toggle" id="toggleConclusion">Conclusion</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="plotSection">
+        <div class="grid" id="plotGrid"></div>
+      </section>
+
+      <section class="viewer" id="viewer">
+        <div class="viewer-header">
+          <div>
+            <span class="badge" id="viewerTag">Overview</span>
+            <h2 id="viewerTitle">UN Voting 2023 Overview</h2>
+            <div class="meta" id="viewerMeta">Interactive briefing</div>
+          </div>
+          <div class="meta" id="viewerFile">plots/UN_voting_2023_interactive.html</div>
+        </div>
+        <div class="viewer-body">
+          <iframe id="viewerFrame" src="plots/UN_voting_2023_interactive.html" title="UN Voting Plot"></iframe>
+          <aside class="insight-panel">
+            <h3 id="viewerInsightTitle">Executive summary</h3>
+            <p id="viewerInsightBody">
+              Select a plot to review the narrative summary, key questions to ask, and how to interpret the view.
+            </p>
+            <h4>Explanation</h4>
+            <p id="viewerExplanation"></p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="conclusion" id="conclusionPanel" aria-live="polite">
+        <h3>Overall conclusion</h3>
+        <p id="conclusionText"></p>
+      </section>
+
+      <section class="intro">
+        <h2>Methodology & interpretation guide</h2>
+        <p>
+          Each visual is designed to complement the same underlying voting data and ideal-point measures.
+          Interpret directional movement as changes in alignment or coalition behavior, and compare clusters
+          to identify stable voting blocs. Use the explanations to frame what the plot reveals, why it matters,
+          and which patterns deserve closer inspection.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      const plots = [
+        {
+          title: "UN Voting 2023 Overview",
+          file: "plots/UN_voting_2023_interactive.html",
+          tag: "Overview",
+          description: "Interactive summary of the 2023 General Assembly voting landscape.",
+          insight:
+            "This overview maps countries by voting similarity. The US and UK typically appear in the same cluster, while China and Russia often form or sit near a distinct cluster. India usually occupies an intermediate position, helping explain cases where it aligns with either side. Use this to show how the five major powers anchor the broader voting space.",
+          explanation:
+            "Each dot is a country. Tight clusters show groups that vote alike; gaps between clusters indicate different voting priorities. Compare the spacing of the US and UK to China and Russia, then locate India to show where it bridges or diverges. A country positioned closer to the US typically mirrors US voting behavior more often, while distance suggests divergence on key resolutions.",
+        },
+        {
+          title: "Ideological Composition",
+          file: "plots/ideological_composition_interactive.html",
+          tag: "Ideology",
+          description: "Composition of ideological groupings across member states.",
+          insight:
+            "This chart groups countries into ideological camps. The US and UK tend to occupy similar bands, while China and Russia tend to anchor a different band. India often appears in overlapping space, signaling a mix of positions across issues.",
+          explanation:
+            "Each band represents a voting tendency derived from ideal‑point estimates. Wider bands signal more countries in that camp. Use the positions of the US and UK to describe the Western alignment band, then contrast with China and Russia’s band. India’s placement often shows partial alignment with both, which is useful when explaining issue‑by‑issue shifts.",
+        },
+        {
+          title: "Animated Voting Scatter",
+          file: "plots/modern_animated_scatter.html",
+          tag: "Trends",
+          description: "Movement of countries over time in a dynamic scatter view.",
+          insight:
+            "This animation shows how the major powers move over time. The US and UK typically track each other closely, China and Russia often move together, while India’s path can shift between them. Use this to explain stability versus realignment among the five.",
+          explanation:
+            "Each country leaves a trail across the voting space. Short, steady paths suggest stable positions (often seen with the US or UK), while shifting paths reveal changes. Compare China and Russia’s trajectories with India’s to highlight divergence or convergence. If India’s path drifts toward the US cluster, it suggests greater alignment; if it moves toward China/Russia, it suggests the opposite.",
+        },
+        {
+          title: "Global Vote Map 2023",
+          file: "plots/modern_globe_2023.html",
+          tag: "Geography",
+          description: "Globe visualization of voting alignments in 2023.",
+          insight:
+            "This map shows where the major powers sit geographically while reflecting their voting alignment. It helps connect the US and UK to transatlantic voting patterns and China and Russia to Eurasian patterns, with India as a regional pivot.",
+          explanation:
+            "Countries are colored or sized by alignment metrics. Use the US and UK to anchor one alignment reference, China and Russia to anchor the other, and then show how India compares to its regional neighbors. This framing helps explain whether geography reinforces or contradicts voting alignment.",
+        },
+        {
+          title: "Parallel Coordinates",
+          file: "plots/modern_parallel_coords.html",
+          tag: "Comparative",
+          description: "Compare multiple vote dimensions for each member state.",
+          insight:
+            "This plot compares major powers across multiple issue areas. It often shows the US and UK tracking closely, China and Russia aligning on specific dimensions, and India aligning selectively across issues.",
+          explanation:
+            "Each line is a country crossing several axes. Use the US and UK lines as one reference, China and Russia as another, and then discuss how India’s line departs or converges on each dimension. Where India matches the US on one axis but China/Russia on another, the plot explains mixed alignment.",
+        },
+        {
+          title: "Racing Bars",
+          file: "plots/modern_racing_bars.html",
+          tag: "Trends",
+          description: "Temporal shifts in alignment using a racing bar format.",
+          insight:
+            "This chart ranks alignment over time for the major powers. It helps show whether the US and UK maintain leadership in alignment or whether China and Russia gain relative influence, with India shifting between them.",
+          explanation:
+            "Bars move as time changes. Stable ranks for the US and UK suggest consistent voting patterns, while rising ranks for China or Russia imply stronger alignment influence. India’s movement shows whether it leans toward one side or stays independent. Use this to narrate periods when the US loses or gains relative alignment compared to the other four powers.",
+        },
+        {
+          title: "Sunburst Composition",
+          file: "plots/modern_sunburst.html",
+          tag: "Ideology",
+          description: "Hierarchical breakdown of voting coalitions.",
+          insight:
+            "This chart shows how coalitions break into smaller sub‑groups. It helps explain how the US and UK sit within one large bloc, China and Russia within another, and where India fits in the internal structure.",
+          explanation:
+            "The center represents major coalitions; outer rings show sub‑groups. Use the slices around the US and UK versus China and Russia to show bloc size, and highlight whether India appears near a dominant or mixed subgroup. This is a good way to explain whether India is embedded within a bloc or positioned as a bridge.",
+        },
+        {
+          title: "Voting Violins",
+          file: "plots/modern_violins.html",
+          tag: "Distribution",
+          description: "Distribution of voting agreement across groups.",
+          insight:
+            "This chart compares how internally consistent coalitions are. It helps contrast the cohesion around the US and UK with the cohesion around China and Russia, and shows where India fits.",
+          explanation:
+            "Each shape shows the spread of agreement scores. Narrow shapes mean high cohesion; wide shapes mean internal diversity. Compare the distributions associated with US/UK versus China/Russia to explain which coalition is more unified and where India sits. If India aligns with the tighter shape, it indicates stronger discipline with that bloc.",
+        },
+        {
+          title: "Persistence vs Extremeness",
+          file: "plots/persistence_extremeness_interactive.html",
+          tag: "Dynamics",
+          description: "Persistence of positions compared to ideological extremeness.",
+          insight:
+            "This plot shows whether major powers are stable or shifting. It helps explain whether the US and UK are consistently positioned, whether China and Russia are stable at their extremes, and where India changes course.",
+          explanation:
+            "Countries in the upper‑right are extreme and stable; those in the lower‑left are moderate but change more. Compare the placement of the US, UK, China, Russia, and India to explain stability versus flexibility among the five. If India sits closer to the center, it suggests a balancing role between the other powers.",
+        },
+        {
+          title: "Voting Polarization",
+          file: "plots/voting_Polarization_interactive.html",
+          tag: "Polarization",
+          description: "Measure polarization in UN voting behavior.",
+          insight:
+            "This chart shows how divided the UN is. In practice, higher polarization often corresponds to sharper divides between US/UK positions and China/Russia positions, with India sometimes moderating the gap.",
+          explanation:
+            "Higher values mean the blocs are further apart; lower values mean more agreement. Use spikes to explain periods when US/UK and China/Russia positions diverge strongly, and note whether India aligns with either side or stays intermediate. This helps describe whether India dampens or reinforces polarization.",
+        },
+        {
+          title: "Alignment Heatmap",
+          file: "plots/voting_alignment_heatmap_interactive.html",
+          tag: "Alignment",
+          description: "Heatmap of alignment between member states.",
+          insight:
+            "This heatmap shows which major powers align closely with each other. It makes it easy to see strong US‑UK alignment, China‑Russia alignment, and how India relates to both.",
+          explanation:
+            "Darker cells mean stronger alignment. Look for dark cells between the US and UK, and between China and Russia. Compare India’s cell intensities to show whether it aligns more with one pair or stays intermediate. This is the clearest plot for explaining bilateral alignment strength.",
+        },
+        {
+          title: "Alignment with US",
+          file: "plots/voting_alignment_with_US_interactive.html",
+          tag: "Alignment",
+          description: "How voting patterns align with the United States.",
+          insight:
+            "This view compares each country’s voting record with the United States. It is especially useful for contrasting China and Russia’s divergence with the US, while assessing whether India and the UK align more closely.",
+          explanation:
+            "Higher alignment scores indicate closer voting with the US. Expect the UK to score high and China/Russia lower; India often sits in the middle. Use this to explain alignment and distance among the five major powers, and to highlight where the US stands relative to the other four.",
+        },
+      ];
+
+      const viewerTitle = document.getElementById("viewerTitle");
+      const viewerFrame = document.getElementById("viewerFrame");
+      const viewerMeta = document.getElementById("viewerMeta");
+      const viewerFile = document.getElementById("viewerFile");
+      const viewerTag = document.getElementById("viewerTag");
+      const viewerInsightTitle = document.getElementById("viewerInsightTitle");
+      const viewerInsightBody = document.getElementById("viewerInsightBody");
+      const viewerExplanation = document.getElementById("viewerExplanation");
+      const viewerSection = document.getElementById("viewer");
+      const toggleConclusion = document.getElementById("toggleConclusion");
+      const conclusionPanel = document.getElementById("conclusionPanel");
+      const conclusionText = document.getElementById("conclusionText");
+      const plotGrid = document.getElementById("plotGrid");
+      const tagFilters = document.getElementById("tagFilters");
+
+      const tags = [...new Set(plots.map((plot) => plot.tag))];
+      let activeTag = null;
+
+      function renderTags() {
+        tagFilters.innerHTML = "";
+        tags.forEach((tag) => {
+          const button = document.createElement("button");
+          button.className = `pill ${tag === activeTag ? "active" : ""}`;
+          button.textContent = tag;
+          button.addEventListener("click", () => {
+            showViewer();
+            activeTag = activeTag === tag ? null : tag;
+            renderTags();
+            renderPlots();
+          });
+          tagFilters.appendChild(button);
+        });
+      }
+
+      function matchesFilters(plot) {
+        return !activeTag || plot.tag === activeTag;
+      }
+
+      const overallConclusion =
+        "Across the full set of visuals, the UN General Assembly shows a stable structure of voting blocs with selective, issue‑driven flexibility. The overview map and ideological composition plots reveal two large clusters anchored by the US/UK and China/Russia, while India often sits between them, reflecting mixed alignment rather than a fixed bloc commitment. The animated scatter and racing bars highlight how most countries move gradually, yet a subset can shift quickly in response to geopolitical events, changing relative alignment and influence over time. The globe and heatmap views show that geography matters, but bilateral relationships and strategic ties can override regional patterns, creating cross‑regional alliances and unexpected voting partnerships. Distribution and persistence plots indicate that some blocs vote with high internal cohesion, while others contain more diverse or shifting positions, suggesting different levels of discipline inside each coalition. The polarization plot confirms that division intensifies on high‑stakes resolutions, but consensus still appears in lower‑salience votes, keeping the system from hard gridlock. Overall, the analysis supports a conclusion of constrained flexibility: durable blocs shape outcomes, yet targeted diplomacy and evolving interests can still reconfigure alignment when stakes rise, especially during major international shocks.";
+
+      function showConclusion() {
+        conclusionPanel.classList.add("active");
+        viewerSection.classList.add("hidden");
+        conclusionPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function showViewer() {
+        viewerSection.classList.remove("hidden");
+        conclusionPanel.classList.remove("active");
+      }
+
+      function updateViewer(plot) {
+        showViewer();
+        viewerTitle.textContent = plot.title;
+        viewerFrame.src = plot.file;
+        viewerMeta.textContent = plot.description;
+        viewerFile.textContent = plot.file;
+        viewerTag.textContent = plot.tag;
+        viewerInsightTitle.textContent = "Executive summary";
+        viewerInsightBody.textContent = plot.insight;
+        viewerExplanation.textContent = plot.explanation;
+      }
+
+      function renderPlots() {
+        plotGrid.innerHTML = "";
+        const filtered = plots.filter(matchesFilters);
+        filtered.forEach((plot, index) => {
+          const card = document.createElement("article");
+          card.className = "card fade-in";
+          card.style.animationDelay = `${index * 0.05}s`;
+
+          const title = document.createElement("h3");
+          title.textContent = plot.title;
+
+          const desc = document.createElement("p");
+          desc.textContent = plot.description;
+
+          const button = document.createElement("button");
+          button.textContent = "Open Plot";
+          button.addEventListener("click", () => updateViewer(plot));
+
+          card.appendChild(title);
+          card.appendChild(desc);
+          card.appendChild(button);
+          plotGrid.appendChild(card);
+        });
+
+        if (filtered.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "card";
+          empty.innerHTML = "<h3>No plots found</h3><p>Try a different search or filter.</p>";
+          plotGrid.appendChild(empty);
+        }
+      }
+
+      toggleConclusion.addEventListener("click", () => {
+        showConclusion();
+      });
+
+      renderTags();
+      renderPlots();
+      updateViewer(plots[0]);
+      conclusionText.textContent = overallConclusion;
+    </script>
+  </body>
+</html>
