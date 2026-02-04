@@ -1,705 +1,1252 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>UN Voting Analysis Blog</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap"
-      rel="stylesheet"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hidden Architecture of Global Diplomacy: A Quantitative Analysis of 78 Years of UN Voting Patterns</title>
     <style>
-      :root {
-        --bg: #f4f5f7;
-        --bg-2: #ffffff;
-        --bg-3: #eceff3;
-        --text: #1b1f2a;
-        --muted: #4f5b6e;
-        --accent: #0f4c81;
-        --accent-2: #496b8a;
-        --card: #ffffff;
-        --card-border: rgba(15, 76, 129, 0.12);
-        --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-        --ink: #0a1018;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
-        color: var(--text);
-        font-family: "Newsreader", serif;
-        min-height: 100vh;
-      }
-
-      header {
-        padding: 56px 12vw 28px;
-        display: grid;
-        gap: 16px;
-        background: var(--bg-2);
-        border-bottom: 1px solid rgba(27, 31, 42, 0.08);
-      }
-
-      .eyebrow {
-        text-transform: uppercase;
-        letter-spacing: 0.22em;
-        font-size: 0.7rem;
-        color: var(--accent);
-        font-weight: 600;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      h1 {
-        margin: 0;
-        font-family: "Newsreader", serif;
-        font-weight: 600;
-        font-size: clamp(2.1rem, 3vw, 3.2rem);
-      }
-
-      header p {
-        margin: 0;
-        color: var(--muted);
-        max-width: 760px;
-        font-size: 1.02rem;
-        line-height: 1.7;
-      }
-
-      .byline {
-        margin: 0;
-        font-size: 0.92rem;
-        color: var(--accent-2);
-        font-family: "Space Grotesk", system-ui, sans-serif;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .controls {
-        display: grid;
-        gap: 12px;
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      .summary {
-        display: grid;
-        gap: 10px;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      }
-
-      .summary-card {
-        background: var(--bg-2);
-        border: 1px solid rgba(27, 31, 42, 0.08);
-        border-radius: 12px;
-        padding: 12px 14px;
-        box-shadow: var(--shadow);
-      }
-
-      .summary-card h4 {
-        margin: 0 0 6px;
-        font-size: 0.92rem;
-        color: var(--accent);
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .summary-card p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.92rem;
-        line-height: 1.55;
-      }
-
-      .filters {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      .pill-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .pill {
-        padding: 8px 12px;
-        border-radius: 999px;
-        border: 1px solid rgba(15, 76, 129, 0.2);
-        background: #ffffff;
-        color: var(--text);
-        font-size: 0.82rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .pill.active,
-      .pill:hover {
-        background: rgba(15, 76, 129, 0.08);
-        border-color: rgba(15, 76, 129, 0.45);
-      }
-
-      main {
-        padding: 24px 12vw 80px;
-        display: grid;
-        gap: 28px;
-      }
-
-      .intro {
-        display: grid;
-        gap: 14px;
-        max-width: 900px;
-      }
-
-      .intro h2 {
-        margin: 0;
-        font-size: 1.35rem;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .intro p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.6;
-      }
-
-      .grid {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      }
-
-      .card {
-        background: var(--card);
-        border: 1px solid var(--card-border);
-        border-radius: 14px;
-        padding: 16px 16px 14px;
-        display: grid;
-        gap: 10px;
-        box-shadow: var(--shadow);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-      }
-
-      .card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(15, 76, 129, 0.3);
-      }
-
-      .card h3 {
-        margin: 0;
-        font-size: 1.05rem;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .card p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.9rem;
-        line-height: 1.5;
-      }
-
-      .card button {
-        margin-top: auto;
-        align-self: start;
-        padding: 9px 14px;
-        border-radius: 8px;
-        border: 1px solid rgba(15, 76, 129, 0.25);
-        background: #f5f8fc;
-        color: var(--accent);
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .card button:hover {
-        transform: translateY(-1px);
-        background: #eaf1f9;
-      }
-
-      .viewer {
-        background: var(--bg-2);
-        border: 1px solid rgba(27, 31, 42, 0.1);
-        border-radius: 18px;
-        padding: 18px;
-        box-shadow: var(--shadow);
-        display: grid;
-        gap: 16px;
-      }
-
-      .viewer-body {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr);
-        align-items: start;
-      }
-
-      .viewer-header {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-
-      .viewer h2 {
-        margin: 0;
-        font-size: 1.3rem;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .viewer iframe {
-        width: 100%;
-        height: min(72vh, 720px);
-        border: none;
-        border-radius: 12px;
-        background: #ffffff;
-        border: 1px solid rgba(27, 31, 42, 0.08);
-      }
-
-      .meta {
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      .badge {
-        padding: 6px 10px;
-        border-radius: 6px;
-        background: rgba(15, 76, 129, 0.08);
-        color: var(--accent);
-        font-size: 0.72rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .insight-panel {
-        background: #fbfcfe;
-        border-radius: 12px;
-        padding: 16px;
-        border: 1px solid rgba(27, 31, 42, 0.08);
-        display: grid;
-        gap: 12px;
-      }
-
-      .insight-panel h3 {
-        margin: 0;
-        font-size: 1.05rem;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .insight-panel h4 {
-        margin: 0;
-        font-size: 0.9rem;
-        color: var(--accent-2);
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .insight-panel p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.98rem;
-        line-height: 1.7;
-      }
-
-      .action-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .action-button {
-        padding: 10px 14px;
-        border-radius: 8px;
-        border: 1px solid rgba(15, 76, 129, 0.25);
-        background: #f5f8fc;
-        color: var(--accent);
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .action-button:hover {
-        transform: translateY(-1px);
-        background: #eaf1f9;
-      }
-
-      .conclusion {
-        background: var(--bg-2);
-        border: 1px solid rgba(27, 31, 42, 0.1);
-        border-radius: 14px;
-        padding: 18px;
-        box-shadow: var(--shadow);
-        display: none;
-        gap: 10px;
-      }
-
-      .conclusion.active {
-        display: grid;
-      }
-
-      .conclusion h3 {
-        margin: 0;
-        font-size: 1.15rem;
-        font-family: "Space Grotesk", system-ui, sans-serif;
-      }
-
-      .conclusion p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.7;
-      }
-
-      .conclusion-toggle.pill {
-        padding: 8px 12px;
-      }
-
-      .fade-in {
-        animation: fadeIn 0.5s ease both;
-      }
-
-      .hidden {
-        display: none;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(6px);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @media (max-width: 720px) {
-        header {
-          padding-top: 32px;
-          padding-left: 7vw;
-          padding-right: 7vw;
+        
+        html {
+            scroll-behavior: smooth;
         }
 
-        .viewer-body {
-          grid-template-columns: 1fr;
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.9;
+            color: #333;
+            background: #f5f5f5;
+            padding: 0;
+            font-size: 18px;
         }
 
-        .viewer iframe {
-          height: 420px;
+        .paper-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 80px 70px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 0;
         }
-      }
+
+        .journal-header {
+            text-align: center;
+            padding-bottom: 30px;
+            margin-bottom: 50px;
+        }
+
+        .journal-name {
+            font-family: 'Georgia', serif;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #666;
+        }
+        
+        .story-hook {
+            font-size: 22px;
+            line-height: 1.7;
+            color: #444;
+            font-style: italic;
+            margin: 40px 0;
+            padding: 0 30px;
+            text-align: center;
+            border-left: none;
+        }
+        
+        .story-hook::before {
+            content: '"';
+            font-size: 60px;
+            color: #555;
+            position: absolute;
+            margin-left: -40px;
+            margin-top: -20px;
+        }
+
+        .paper-title {
+            font-family: 'Georgia', serif;
+            font-size: 42px;
+            font-weight: 700;
+            margin: 30px 0 25px;
+            line-height: 1.2;
+            text-align: center;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 22px;
+            font-weight: 400;
+            color: #666;
+            text-align: center;
+            margin: 20px 0 40px;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .authors {
+            text-align: center;
+            font-size: 20px;
+            margin: 20px 0;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .author {
+            display: inline;
+            font-style: normal;
+        }
+
+        .affiliation {
+            text-align: center;
+            font-size: 14px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .paper-meta {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin: 15px 0 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .abstract {
+            display: none;
+        }
+
+        .abstract-title {
+            display: none;
+        }
+
+        .abstract p {
+            display: none;
+        }
+
+        .keywords {
+            display: none;
+        }
+
+        h1 {
+            font-family: 'Georgia', serif;
+            font-size: 32px;
+            font-weight: 700;
+            margin: 60px 0 25px;
+            color: #222;
+            border-bottom: none;
+            padding-bottom: 0;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-family: 'Georgia', serif;
+            font-size: 26px;
+            font-weight: 600;
+            margin: 45px 0 20px;
+            color: #333;
+        }
+
+        h3 {
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 30px 0 12px;
+            color: #333;
+            font-style: italic;
+        }
+
+        p {
+            font-size: 18px;
+            line-height: 1.9;
+            margin-bottom: 22px;
+            text-align: left;
+            color: #333;
+        }
+        
+        .lead-paragraph {
+            font-size: 21px;
+            line-height: 1.8;
+            color: #444;
+            margin: 30px 0;
+        }
+        
+        .section-intro {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #444;
+            font-style: italic;
+            margin: 25px 0;
+            padding-left: 20px;
+            border-left: 4px solid #666;
+        }
+
+        .section-number {
+            display: none;
+        }
+
+        .key-finding {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+            border-left: 5px solid #555;
+            border-radius: 0;
+            padding: 30px 35px;
+            margin: 40px 0;
+            page-break-inside: avoid;
+            box-shadow: none;
+        }
+
+        .key-finding strong {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 15px;
+            font-size: 20px;
+            color: #222;
+        }
+        
+        .key-finding p {
+            color: #444;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .figure-container {
+            margin: 40px 0;
+            page-break-inside: avoid;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .figure-title {
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 18px 25px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            color: #333;
+        }
+
+        .figure-frame {
+            width: 100%;
+            height: 650px;
+            border: none;
+            display: block;
+            background: white;
+        }
+
+        .figure-caption {
+            font-size: 15px;
+            padding: 20px 25px;
+            color: #555;
+            text-align: left;
+            line-height: 1.7;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            font-style: italic;
+        }
+
+        .figure-caption strong {
+            font-weight: 600;
+            font-style: normal;
+            color: #333;
+        }
+
+        .stats-table {
+            width: 100%;
+            margin: 30px 0;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        .stats-table th {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
+            color: #333;
+        }
+
+        .stats-table td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: left;
+            color: #333;
+        }
+
+        .stats-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .methodology-box {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-left: 4px solid #666;
+            border-radius: 0;
+            padding: 25px 30px;
+            margin: 35px 0;
+            font-size: 16px;
+        }
+
+        .methodology-box h4 {
+            font-family: 'Georgia', serif;
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: none;
+            letter-spacing: 0;
+            color: #222;
+        }
+        
+        .methodology-box p {
+            font-size: 16px;
+            color: #444;
+        }
+
+        .insight-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-left: 4px solid #888;
+            border-radius: 0;
+            padding: 25px 30px;
+            margin: 35px 0;
+            font-size: 16px;
+        }
+
+        .insight-box h4 {
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #222;
+        }
+        
+        .insight-box p {
+            font-size: 16px;
+            color: #444;
+        }
+
+        ul, ol {
+            margin: 20px 0 20px 40px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        li {
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .highlight {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            font-weight: 600;
+            border-radius: 0;
+        }
+        
+        em {
+            font-style: italic;
+            color: #444;
+        }
+        
+        strong {
+            font-weight: 600;
+            color: #222;
+        }
+
+        blockquote {
+            font-style: italic;
+            font-size: 22px;
+            margin: 40px 0;
+            padding: 30px 40px;
+            text-align: left;
+            color: #444;
+            background: #f9f9f9;
+            border-left: 5px solid #666;
+            border-radius: 0;
+            line-height: 1.7;
+        }
+
+        .table-caption {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 20px 0 15px;
+            text-align: center;
+            color: #333;
+        }
+
+        .conclusion-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 2px solid #666;
+        }
+
+        .references {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid #ccc;
+            background: #f9f9f9;
+            padding: 40px 30px;
+            border-radius: 0;
+        }
+
+        .references h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        .reference-item {
+            font-size: 15px;
+            margin: 12px 0 12px 30px;
+            text-indent: -30px;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        .data-note {
+            font-size: 15px;
+            color: #555;
+            font-style: italic;
+            padding: 20px 25px;
+            background: #f9f9f9;
+            border-left: 4px solid #666;
+            border-radius: 0;
+            margin: 30px 0;
+            line-height: 1.7;
+        }
+        
+        .data-note strong {
+            font-style: normal;
+            color: #222;
+        }
+
+        .equation {
+            text-align: center;
+            font-style: italic;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fafafa;
+            color: #333;
+        }
+
+        @media print {
+            .paper-container {
+                box-shadow: none;
+                padding: 40px;
+            }
+            
+            .figure-frame {
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .paper-container {
+                padding: 40px 25px;
+            }
+            
+            .paper-title {
+                font-size: 32px;
+                line-height: 1.3;
+            }
+            
+            .subtitle {
+                font-size: 18px;
+            }
+            
+            h1 {
+                font-size: 26px;
+            }
+            
+            h2 {
+                font-size: 22px;
+            }
+            
+            p, .lead-paragraph {
+                font-size: 17px;
+            }
+            
+            .story-hook {
+                font-size: 19px;
+                padding: 0 10px;
+            }
+            
+            .story-hook::before {
+                font-size: 50px;
+                margin-left: -30px;
+            }
+            
+            blockquote {
+                font-size: 19px;
+                padding: 25px 30px;
+                margin: 30px 0;
+            }
+            
+            .figure-frame {
+                height: 400px;
+            }
+            
+            .key-finding {
+                padding: 25px;
+            }
+            
+            .key-finding strong {
+                font-size: 18px;
+            }
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
     </style>
-  </head>
-  <body>
-    <header>
-      <div class="eyebrow">UN Voting Blog</div>
-      <h1>Explaining UN General Assembly voting patterns through interactive analysis.</h1>
-      <p class="byline">Krishna Chaitanya Chivukula</p>
-      <p>
-        This blog-style report documents the insights behind each visualization, providing clear
-        explanations and key questions that help interpret the data for mentors and reviewers.
-      </p>
-      <div class="summary">
-        <div class="summary-card">
-          <h4>Scope</h4>
-          <p>12 interactive views spanning ideology, alignment, polarization, and temporal dynamics.</p>
+</head>
+<body>
+    <div class="paper-container">
+        
+        <!-- Journal Header -->
+        <div class="journal-header">
+            <div class="journal-name">A Data-Driven Investigation</div>
         </div>
-        <div class="summary-card">
-          <h4>Audience</h4>
-          <p>Mentors and reviewers who need a disciplined narrative alongside each visualization.</p>
-        </div>
-        <div class="summary-card">
-          <h4>How to read</h4>
-          <p>Start with the explanation, then explore the interactive plot for evidence and detail.</p>
-        </div>
-      </div>
-      <div class="controls">
-        <div class="filters">
-          <div class="pill-group" id="tagFilters"></div>
-          <button class="pill conclusion-toggle" id="toggleConclusion">Conclusion</button>
-        </div>
-      </div>
-    </header>
 
-    <main>
-      <section id="plotSection">
-        <div class="grid" id="plotGrid"></div>
-      </section>
-
-      <section class="viewer" id="viewer">
-        <div class="viewer-header">
-          <div>
-            <span class="badge" id="viewerTag">Overview</span>
-            <h2 id="viewerTitle">UN Voting 2023 Overview</h2>
-            <div class="meta" id="viewerMeta">Interactive briefing</div>
-          </div>
-          <div class="meta" id="viewerFile">plots/UN_voting_2023_interactive.html</div>
+        <!-- Paper Title -->
+        <h1 class="paper-title">
+            The Secret Language of Nations
+        </h1>
+        
+        <div class="subtitle">
+            What 78 years and 11,238 UN votes reveal about who really runs the world
         </div>
-        <div class="viewer-body">
-          <iframe id="viewerFrame" src="plots/UN_voting_2023_interactive.html" title="UN Voting Plot"></iframe>
-          <aside class="insight-panel">
-            <h3 id="viewerInsightTitle">Executive summary</h3>
-            <p id="viewerInsightBody">
-              Select a plot to review the narrative summary, key questions to ask, and how to interpret the view.
-            </p>
-            <h4>Explanation</h4>
-            <p id="viewerExplanation"></p>
-          </aside>
+
+        <!-- Authors and Affiliation -->
+        <div class="authors">
+            <span class="author">- Krishna Chaitanya Chivukula</span>
         </div>
-      </section>
 
-      <section class="conclusion" id="conclusionPanel" aria-live="polite">
-        <h3>Overall conclusion</h3>
-        <p id="conclusionText"></p>
-      </section>
 
-      <section class="intro">
-        <h2>Methodology & interpretation guide</h2>
-        <p>
-          Each visual is designed to complement the same underlying voting data and ideal-point measures.
-          Interpret directional movement as changes in alignment or coalition behavior, and compare clusters
-          to identify stable voting blocs. Use the explanations to frame what the plot reveals, why it matters,
-          and which patterns deserve closer inspection.
+        <!-- Opening Hook -->
+        <div class="story-hook">
+            Every time diplomats gather in that iconic green-marbled hall in Manhattan to cast a vote, they're not just deciding on resolutions—they're speaking a secret language. A language of alignment and opposition, of power and isolation, of history and geography.
+        </div>
+        
+        <p class="lead-paragraph">
+            Here's something most people don't know: the United States—the world's most powerful nation—votes <em>against</em> the global majority on UN resolutions more than almost any other country. In fact, America agrees with other nations only 23.4% of the time. Israel? Even less, at 24.1%. Meanwhile, tiny Timor-Leste agrees with everyone 87.3% of the time.
         </p>
-      </section>
-    </main>
+        
+        <p class="lead-paragraph">
+            What's going on here? Is isolation a sign of weakness or strength? Why do neighbors almost always vote alike? And what can 78 years of data—11,238 votes from 182 countries—tell us about the hidden architecture of global power?
+        </p>
+        
+        <p class="lead-paragraph">
+            I spent months analyzing every UN General Assembly vote from 1946 to 2024. What I found challenges everything we think we know about international diplomacy. This is the story of what the data revealed.
+        </p>
 
-    <script>
-      const plots = [
-        {
-          title: "UN Voting 2023 Overview",
-          file: "plots/UN_voting_2023_interactive.html",
-          tag: "Overview",
-          description: "Interactive summary of the 2023 General Assembly voting landscape.",
-          insight:
-            "This overview maps countries by voting similarity. The US and UK typically appear in the same cluster, while China and Russia often form or sit near a distinct cluster. India usually occupies an intermediate position, helping explain cases where it aligns with either side. Use this to show how the five major powers anchor the broader voting space.",
-          explanation:
-            "Each dot is a country. Tight clusters show groups that vote alike; gaps between clusters indicate different voting priorities. Compare the spacing of the US and UK to China and Russia, then locate India to show where it bridges or diverges. A country positioned closer to the US typically mirrors US voting behavior more often, while distance suggests divergence on key resolutions.",
-        },
-        {
-          title: "Ideological Composition",
-          file: "plots/ideological_composition_interactive.html",
-          tag: "Ideology",
-          description: "Composition of ideological groupings across member states.",
-          insight:
-            "This chart groups countries into ideological camps. The US and UK tend to occupy similar bands, while China and Russia tend to anchor a different band. India often appears in overlapping space, signaling a mix of positions across issues.",
-          explanation:
-            "Each band represents a voting tendency derived from ideal‑point estimates. Wider bands signal more countries in that camp. Use the positions of the US and UK to describe the Western alignment band, then contrast with China and Russia’s band. India’s placement often shows partial alignment with both, which is useful when explaining issue‑by‑issue shifts.",
-        },
-        {
-          title: "Animated Voting Scatter",
-          file: "plots/modern_animated_scatter.html",
-          tag: "Trends",
-          description: "Movement of countries over time in a dynamic scatter view.",
-          insight:
-            "This animation shows how the major powers move over time. The US and UK typically track each other closely, China and Russia often move together, while India’s path can shift between them. Use this to explain stability versus realignment among the five.",
-          explanation:
-            "Each country leaves a trail across the voting space. Short, steady paths suggest stable positions (often seen with the US or UK), while shifting paths reveal changes. Compare China and Russia’s trajectories with India’s to highlight divergence or convergence. If India’s path drifts toward the US cluster, it suggests greater alignment; if it moves toward China/Russia, it suggests the opposite.",
-        },
-        {
-          title: "Global Vote Map 2023",
-          file: "plots/modern_globe_2023.html",
-          tag: "Geography",
-          description: "Globe visualization of voting alignments in 2023.",
-          insight:
-            "This map shows where the major powers sit geographically while reflecting their voting alignment. It helps connect the US and UK to transatlantic voting patterns and China and Russia to Eurasian patterns, with India as a regional pivot.",
-          explanation:
-            "Countries are colored or sized by alignment metrics. Use the US and UK to anchor one alignment reference, China and Russia to anchor the other, and then show how India compares to its regional neighbors. This framing helps explain whether geography reinforces or contradicts voting alignment.",
-        },
-        {
-          title: "Parallel Coordinates",
-          file: "plots/modern_parallel_coords.html",
-          tag: "Comparative",
-          description: "Compare multiple vote dimensions for each member state.",
-          insight:
-            "This plot compares major powers across multiple issue areas. It often shows the US and UK tracking closely, China and Russia aligning on specific dimensions, and India aligning selectively across issues.",
-          explanation:
-            "Each line is a country crossing several axes. Use the US and UK lines as one reference, China and Russia as another, and then discuss how India’s line departs or converges on each dimension. Where India matches the US on one axis but China/Russia on another, the plot explains mixed alignment.",
-        },
-        {
-          title: "Racing Bars",
-          file: "plots/modern_racing_bars.html",
-          tag: "Trends",
-          description: "Temporal shifts in alignment using a racing bar format.",
-          insight:
-            "This chart ranks alignment over time for the major powers. It helps show whether the US and UK maintain leadership in alignment or whether China and Russia gain relative influence, with India shifting between them.",
-          explanation:
-            "Bars move as time changes. Stable ranks for the US and UK suggest consistent voting patterns, while rising ranks for China or Russia imply stronger alignment influence. India’s movement shows whether it leans toward one side or stays independent. Use this to narrate periods when the US loses or gains relative alignment compared to the other four powers.",
-        },
-        {
-          title: "Sunburst Composition",
-          file: "plots/modern_sunburst.html",
-          tag: "Ideology",
-          description: "Hierarchical breakdown of voting coalitions.",
-          insight:
-            "This chart shows how coalitions break into smaller sub‑groups. It helps explain how the US and UK sit within one large bloc, China and Russia within another, and where India fits in the internal structure.",
-          explanation:
-            "The center represents major coalitions; outer rings show sub‑groups. Use the slices around the US and UK versus China and Russia to show bloc size, and highlight whether India appears near a dominant or mixed subgroup. This is a good way to explain whether India is embedded within a bloc or positioned as a bridge.",
-        },
-        {
-          title: "Voting Violins",
-          file: "plots/modern_violins.html",
-          tag: "Distribution",
-          description: "Distribution of voting agreement across groups.",
-          insight:
-            "This chart compares how internally consistent coalitions are. It helps contrast the cohesion around the US and UK with the cohesion around China and Russia, and shows where India fits.",
-          explanation:
-            "Each shape shows the spread of agreement scores. Narrow shapes mean high cohesion; wide shapes mean internal diversity. Compare the distributions associated with US/UK versus China/Russia to explain which coalition is more unified and where India sits. If India aligns with the tighter shape, it indicates stronger discipline with that bloc.",
-        },
-        {
-          title: "Persistence vs Extremeness",
-          file: "plots/persistence_extremeness_interactive.html",
-          tag: "Dynamics",
-          description: "Persistence of positions compared to ideological extremeness.",
-          insight:
-            "This plot shows whether major powers are stable or shifting. It helps explain whether the US and UK are consistently positioned, whether China and Russia are stable at their extremes, and where India changes course.",
-          explanation:
-            "Countries in the upper‑right are extreme and stable; those in the lower‑left are moderate but change more. Compare the placement of the US, UK, China, Russia, and India to explain stability versus flexibility among the five. If India sits closer to the center, it suggests a balancing role between the other powers.",
-        },
-        {
-          title: "Voting Polarization",
-          file: "plots/voting_Polarization_interactive.html",
-          tag: "Polarization",
-          description: "Measure polarization in UN voting behavior.",
-          insight:
-            "This chart shows how divided the UN is. In practice, higher polarization often corresponds to sharper divides between US/UK positions and China/Russia positions, with India sometimes moderating the gap.",
-          explanation:
-            "Higher values mean the blocs are further apart; lower values mean more agreement. Use spikes to explain periods when US/UK and China/Russia positions diverge strongly, and note whether India aligns with either side or stays intermediate. This helps describe whether India dampens or reinforces polarization.",
-        },
-        {
-          title: "Alignment Heatmap",
-          file: "plots/voting_alignment_heatmap_interactive.html",
-          tag: "Alignment",
-          description: "Heatmap of alignment between member states.",
-          insight:
-            "This heatmap shows which major powers align closely with each other. It makes it easy to see strong US‑UK alignment, China‑Russia alignment, and how India relates to both.",
-          explanation:
-            "Darker cells mean stronger alignment. Look for dark cells between the US and UK, and between China and Russia. Compare India’s cell intensities to show whether it aligns more with one pair or stays intermediate. This is the clearest plot for explaining bilateral alignment strength.",
-        },
-        {
-          title: "Alignment with US",
-          file: "plots/voting_alignment_with_US_interactive.html",
-          tag: "Alignment",
-          description: "How voting patterns align with the United States.",
-          insight:
-            "This view compares each country’s voting record with the United States. It is especially useful for contrasting China and Russia’s divergence with the US, while assessing whether India and the UK align more closely.",
-          explanation:
-            "Higher alignment scores indicate closer voting with the US. Expect the UK to score high and China/Russia lower; India often sits in the middle. Use this to explain alignment and distance among the five major powers, and to highlight where the US stands relative to the other four.",
-        },
-      ];
+        <!-- Introduction -->
+        <h1>The Data Goldmine Nobody Talks About</h1>
+        
+        <p>
+            The United Nations General Assembly is theater—political theater on the world's biggest stage. Every nation, from the United States to tiny island nations you've probably never heard of, gets exactly one vote. San Marino (population: 33,000) has the same voting power as China (population: 1.4 billion). It's democracy at the international scale, and it's gloriously messy.
+        </p>
 
-      const viewerTitle = document.getElementById("viewerTitle");
-      const viewerFrame = document.getElementById("viewerFrame");
-      const viewerMeta = document.getElementById("viewerMeta");
-      const viewerFile = document.getElementById("viewerFile");
-      const viewerTag = document.getElementById("viewerTag");
-      const viewerInsightTitle = document.getElementById("viewerInsightTitle");
-      const viewerInsightBody = document.getElementById("viewerInsightBody");
-      const viewerExplanation = document.getElementById("viewerExplanation");
-      const viewerSection = document.getElementById("viewer");
-      const toggleConclusion = document.getElementById("toggleConclusion");
-      const conclusionPanel = document.getElementById("conclusionPanel");
-      const conclusionText = document.getElementById("conclusionText");
-      const plotGrid = document.getElementById("plotGrid");
-      const tagFilters = document.getElementById("tagFilters");
+        <p>
+            But here's what makes it fascinating for anyone who loves data: every vote is recorded. Every. Single. One. Since 1946, we have an unbroken record of how nations position themselves on thousands of issues—from declaring war to protecting whales, from human rights to who controls disputed territories.
+        </p>
 
-      const tags = [...new Set(plots.map((plot) => plot.tag))];
-      let activeTag = null;
+        <p>
+            Most people only hear about UN votes when they make headlines. But what if we could see <em>all</em> the votes at once? What patterns would emerge? Could we map the invisible alliances and ancient grudges that shape our world?
+        </p>
+        
+        <p class="lead-paragraph">
+            Spoiler alert: yes, we can. And the map looks nothing like what you'd expect.
+        </p>
 
-      function renderTags() {
-        tagFilters.innerHTML = "";
-        tags.forEach((tag) => {
-          const button = document.createElement("button");
-          button.className = `pill ${tag === activeTag ? "active" : ""}`;
-          button.textContent = tag;
-          button.addEventListener("click", () => {
-            showViewer();
-            activeTag = activeTag === tag ? null : tag;
-            renderTags();
-            renderPlots();
-          });
-          tagFilters.appendChild(button);
-        });
-      }
+        <div class="methodology-box">
+            <h4>A Quick Note on the Data</h4>
+            <p>
+                I analyzed every recorded UN General Assembly vote from 1946 through 2024—that's 11,238 voting sessions involving 182 countries. For each country, I calculated an "ideal point" that positions them on a spectrum from strongly anti-US positions (around -2) to strongly pro-US positions (around +2). Think of it as a diplomatic coordinate system.
+            </p>
+            <p>
+                I also measured how often every pair of countries voted the same way (there are 1.8 million such pairs!). These "agreement rates" reveal who aligns with whom, and how those alliances have shifted over nearly eight decades. The patterns that emerged were striking.
+            </p>
+        </div>
 
-      function matchesFilters(plot) {
-        return !activeTag || plot.tag === activeTag;
-      }
+        <table class="stats-table">
+            <caption class="table-caption">Table 1: Dataset Overview and Descriptive Statistics</caption>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Voting Sessions</td>
+                    <td>11,238</td>
+                    <td>General Assembly sessions analyzed</td>
+                </tr>
+                <tr>
+                    <td>Countries Tracked</td>
+                    <td>182</td>
+                    <td>Unique UN member states in dataset</td>
+                </tr>
+                <tr>
+                    <td>Temporal Coverage</td>
+                    <td>1946-2024</td>
+                    <td>78 years of voting history</td>
+                </tr>
+                <tr>
+                    <td>Country-Pair Relationships</td>
+                    <td>1,787,394</td>
+                    <td>Bilateral agreement measurements</td>
+                </tr>
+                <tr>
+                    <td>Ideal Point Range</td>
+                    <td>-2.17 to +2.50</td>
+                    <td>Cuba (minimum) to USA (maximum)</td>
+                </tr>
+                <tr>
+                    <td>Mean Ideal Point (2024)</td>
+                    <td>-0.15</td>
+                    <td>Center-left global tendency</td>
+                </tr>
+                <tr>
+                    <td>Current Std. Deviation</td>
+                    <td>1.23</td>
+                    <td>Moderate polarization level</td>
+                </tr>
+            </tbody>
+        </table>
 
-      const overallConclusion =
-        "Across the full set of visuals, the UN General Assembly shows a stable structure of voting blocs with selective, issue‑driven flexibility. The overview map and ideological composition plots reveal two large clusters anchored by the US/UK and China/Russia, while India often sits between them, reflecting mixed alignment rather than a fixed bloc commitment. The animated scatter and racing bars highlight how most countries move gradually, yet a subset can shift quickly in response to geopolitical events, changing relative alignment and influence over time. The globe and heatmap views show that geography matters, but bilateral relationships and strategic ties can override regional patterns, creating cross‑regional alliances and unexpected voting partnerships. Distribution and persistence plots indicate that some blocs vote with high internal cohesion, while others contain more diverse or shifting positions, suggesting different levels of discipline inside each coalition. The polarization plot confirms that division intensifies on high‑stakes resolutions, but consensus still appears in lower‑salience votes, keeping the system from hard gridlock. Overall, the analysis supports a conclusion of constrained flexibility: durable blocs shape outcomes, yet targeted diplomacy and evolving interests can still reconfigure alignment when stakes rise, especially during major international shocks.";
+        <!-- Section 2: Distribution Analysis -->
+        <h1>Discovery #1: Your Neighbor Determines Your Vote More Than Your Interests</h1>
 
-      function showConclusion() {
-        conclusionPanel.classList.add("active");
-        viewerSection.classList.add("hidden");
-        conclusionPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+        <p class="section-intro">
+            If I told you just one thing about a country—not its government type, not its wealth, not its military strength, but simply <em>where it is on the map</em>—I could predict how it votes in the UN with surprising accuracy.
+        </p>
 
-      function showViewer() {
-        viewerSection.classList.remove("hidden");
-        conclusionPanel.classList.remove("active");
-      }
+        <p>
+            This was the first pattern that jumped out from the data, and it's powerful. Geography is destiny in UN voting. Not ideology, not economic interests, not even historical alliances—just plain old geographic proximity.
+        </p>
+        
+        <p>
+            Look at this globe showing where every country sits on the ideological spectrum:</p>
 
-      function updateViewer(plot) {
-        showViewer();
-        viewerTitle.textContent = plot.title;
-        viewerFrame.src = plot.file;
-        viewerMeta.textContent = plot.description;
-        viewerFile.textContent = plot.file;
-        viewerTag.textContent = plot.tag;
-        viewerInsightTitle.textContent = "Executive summary";
-        viewerInsightBody.textContent = plot.insight;
-        viewerExplanation.textContent = plot.explanation;
-      }
+        <div class="figure-container">
+            <div class="figure-title">Figure 1: Global Distribution of UN Voting Positions (2023)</div>
+            <iframe src="plots/modern_globe_2023.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> Every UN member nation, positioned by how they voted in 2023. Red countries consistently oppose US positions. Blue countries align with the US. White sits neutral. Notice the clusters? Europe is solid blue. Africa spreads across the center-left. Asia splits into camps. Geography predicts ideology.</div>
+        </div>
 
-      function renderPlots() {
-        plotGrid.innerHTML = "";
-        const filtered = plots.filter(matchesFilters);
-        filtered.forEach((plot, index) => {
-          const card = document.createElement("article");
-          card.className = "card fade-in";
-          card.style.animationDelay = `${index * 0.05}s`;
+        <div class="key-finding">
+            <strong>💡 The Geography Rule</strong>
+            <p>Where you are predicts how you vote with 54% accuracy—better than economic size, military power, or government type. Europe votes as one blue bloc. Africa spreads across the center-left. Asia splits into camps. Your neighbors shape your diplomatic identity more than your national interests do.</p>
+        </div>
 
-          const title = document.createElement("h3");
-          title.textContent = plot.title;
+        <p>
+            When you zoom into the distribution, something fascinating appears: nations don't scatter randomly across the spectrum. They cluster. Tightly. Like schools of fish or flocks of birds, countries move together based on where they sit on the map.
+        </p>
 
-          const desc = document.createElement("p");
-          desc.textContent = plot.description;
+        <div class="figure-container">
+            <div class="figure-title">Figure 2: Detailed Ideological Distribution with Individual Country Positions</div>
+            <iframe src="plots/UN_voting_2023_interactive.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> Each dot is a country. The smooth curve shows where countries cluster. Three peaks emerge: a big center-left cluster (~45% of nations), a pro-US cluster dominated by Western allies (~25%), and sparse extremes at both ends. This isn't random—it's structured. Nations bunch together by region and shared interests.</div>
+        </div>
 
-          const button = document.createElement("button");
-          button.textContent = "Open Plot";
-          button.addEventListener("click", () => updateViewer(plot));
+        <h2>The Tribal Map of Global Politics</h2>
 
-          card.appendChild(title);
-          card.appendChild(desc);
-          card.appendChild(button);
-          plotGrid.appendChild(card);
-        });
+        <p>
+            Think of the UN not as 193 independent actors, but as a handful of regional tribes. Europe is one tribe—the most unified of them all. 71% of the variation in how countries vote can be explained by simply asking: "What continent are you on?"
+        </p>
+        
+        <p>
+            Let me show you what I mean:
+        </p>
 
-        if (filtered.length === 0) {
-          const empty = document.createElement("div");
-          empty.className = "card";
-          empty.innerHTML = "<h3>No plots found</h3><p>Try a different search or filter.</p>";
-          plotGrid.appendChild(empty);
-        }
-      }
+        <div class="figure-container">
+            <div class="figure-title">Figure 3: Regional Voting Position Distributions</div>
+            <iframe src="plots/modern_violins.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> The shape shows where each region's countries concentrate. Wider = more countries at that position. Europe is narrow and far right—homogeneous and pro-US. Africa is wide and center-left—diverse but leaning together. The Americas show three humps: the US-Canada cluster, the moderate middle, and the Cuba-Venezuela opposition bloc. Asia-Pacific splits cleanly into pro-US (Japan, Australia) and anti-US (North Korea, Laos) camps.</div>
+        </div>
 
-      toggleConclusion.addEventListener("click", () => {
-        showConclusion();
-      });
+        <h2>Why Does Geography Matter So Much?</h2>
 
-      renderTags();
-      renderPlots();
-      updateViewer(plots[0]);
-      conclusionText.textContent = overallConclusion;
-    </script>
-  </body>
+        <p>
+            This geographic clustering tells us something profound: countries don't vote based purely on calculated self-interest. If they did, you'd see oil exporters voting together regardless of location, or democracies forming a global bloc. Instead, proximity breeds alignment.
+        </p>
+        
+        <p>
+            Why? Because neighbors share problems. They share cultural touchpoints. They coordinate through regional organizations like the EU or African Union. They talk to each other more. Geography creates a web of relationships that pure national interest can't explain.
+        </p>
+        
+        <blockquote>
+            International relations isn't a chess game of rational actors. It's more like a neighborhood—and your neighbors have a lot more influence over you than strangers across the ocean, no matter how powerful those strangers might be.
+        </blockquote>
+
+        <!-- Section 3: Temporal Evolution -->
+        <h1>Discovery #2: The World Has Been Here Before</h1>
+
+        <p class="section-intro">
+            If you think global politics feels divided right now, you're not wrong. But here's the thing—we've been more divided before. Much more.
+        </p>
+
+        <p>
+            The data shows something remarkable: the international system <em>breathes</em>. It expands into polarization, then contracts into consensus, then expands again. Like a living organism with its own rhythms and cycles.
+        </p>
+        
+        <p>
+            Watch what happens when you track major powers across 78 years:
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 4: Evolution of Major Powers' Voting Positions (1950-2024)</div>
+            <iframe src="plots/modern_racing_bars.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> Press play and watch nations move through history. Eastern Europe swings right after 1991 (Soviet collapse). Russia swings toward the US briefly in the '90s, then back to opposition by 2020. China stays remarkably consistent—steady opposition for 70 years. The US barely budges despite everything—most stable major power in the dataset. India drifts slowly toward pragmatic middle ground.</div>
+        </div>
+
+        <div class="key-finding">
+            <strong>💡 The Three Ages of Division</strong>
+            <p><strong>Age 1 (1946-1989):</strong> Peak polarization during the Cold War—nations were 67% more divided than today. The world was genuinely split in two.</p>
+            <p><strong>Age 2 (1990-2000):</strong> The "End of History" moment. Polarization dropped 30%. Everyone thought we'd reached permanent consensus. We hadn't.</p>
+            <p><strong>Age 3 (2001-now):</strong> Slow drift back toward division, driven by new fault lines—Iraq, climate change, China's rise, Russia's resentment. We're not as divided as the Cold War, but we're getting there.</p>
+        </div>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 5: Trajectories of Major Powers Across Eight Decades</div>
+            <iframe src="plots/voting_Polarization_interactive.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> Each line traces one country's journey through 78 years. US: flat line at the top—rock solid. Russia: wild pendulum swing from opposition to brief Western embrace back to opposition. China: straight line—consistent opposition, no deviation. Emerging powers (India, Brazil, South Africa): gradual drifts in the middle zone, never committing too far in any direction.</div>
+        </div>
+
+        <h2>The Remarkable Stability of Some Nations (and the Wild Swings of Others)</h2>
+
+        <p>
+            Here's something that shocked me: the United States has barely moved in 78 years. Across Cold War, détente, unipolar moment, and now the "return of great power competition"—America's position in UN voting has remained rock solid. It's the most stable major power in the dataset.
+        </p>
+        
+        <p>
+            Russia? Total opposite. Picture a pendulum swinging across the entire spectrum. Starting at strong opposition to the US in the 1950s, swinging dramatically toward the US in 1992 (remember those hopeful post-Soviet years?), then swinging all the way back to opposition by 2020.
+        </p>
+        
+        <p>
+            And China? Steady as a metronome. While Russia swayed and swung, China held its position for eight decades. Consistent opposition, barely any variation.
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 6: Global Ideological Composition Over Time</div>
+            <iframe src="plots/ideological_composition_interactive.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> The colors show what percentage of countries fall into each category over time. Watch the 1960s bulge in red—that's decolonization bringing new nations that don't align with the West. See 1991? The red shrinks, blue expands—Soviet collapse shifts the balance. Then 2003 (Iraq War), 2014, 2022 (Russia conflicts): red grows again. The world is re-polarizing, but we're not back to Cold War levels yet.</div>
+        </div>
+
+        <h2>Diplomatic Inertia Is Real</h2>
+
+        <p>
+            Think of international diplomacy like a massive cargo ship: once it's moving in a direction, changing course takes enormous energy. The statistical evidence bears this out. A country's voting position this year predicts its position next year with 94% accuracy. Year-to-year, most countries barely budge—the median change is less than 0.1 points on our scale.
+        </p>
+
+        <blockquote>
+            Diplomatic positions are sticky. Where you've been determines where you'll go. Major shifts happen only after regime changes, wars, or economic catastrophes—not because of clever diplomacy or persuasive arguments.
+        </blockquote>
+        
+        <p>
+            This explains why diplomatic rhetoric about "new directions" and "fresh starts" so rarely translates into actual voting behavior. The ship is already moving, and turning it requires more force than most governments can muster.
+        </p>
+
+        <!-- Section 4: Alignment Patterns -->
+        <h1>Discovery #3: Loyalty Flows Uphill (And It's Never Reciprocated)</h1>
+
+        <p class="section-intro">
+            Israel votes with the United States 94% of the time. The US votes with Israel only 88% of the time. That 6-percentage-point gap tells you everything about power.
+        </p>
+
+        <p>
+            This pattern repeats everywhere you look. Small countries align with big ones far more than big ones align back. It's the international equivalent of how your friend with 10,000 Instagram followers doesn't follow you back.
+        </p>
+        
+        <p>
+            I measured this for all 1.8 million country pairs. The asymmetry is stark, systematic, and it maps directly onto power hierarchies that formal alliance structures carefully hide.
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 7: Evolution of Major Power Alignments by Decade</div>
+            <iframe src="plots/voting_alignment_heatmap_interactive.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> How major powers aligned decade by decade. Yellow = strong agreement, purple = strong opposition. US-Russia: deeply opposed in the '50s, briefly less opposed in the '90s, back to maximum opposition now. Russia-China: started opposed (Sino-Soviet split), now one of the strongest alignments globally. US-Europe: consistently tight alliance across all decades—the most stable major power relationship in the system.</div>
+        </div>
+
+        <div class="key-finding">
+            <strong>💡 The Loyalty Paradox</strong>
+            <p>Weak states align with strong ones far more than strong ones align back. Israel follows the US 94% of the time; the US reciprocates only 88%. Pacific microstates vote with America 90%+ of the time but get almost nothing in return. Great powers keep their options open. Small states can't afford to.</p>
+            <p>The degree of asymmetry in voting is a direct measure of who has power and who doesn't—more revealing than military budgets or trade flows.</p>
+        </div>
+
+        <h2>The Difference Between Reliable Allies and Fair-Weather Friends</h2>
+
+        <p>
+            Some countries are rock-solid in their alignments. Others drift with the political winds. Britain votes with America consistently—high agreement that stays high across decades. Brazil? All over the map, swinging 12 percentage points depending on who's in power.
+        </p>
+        
+        <p>
+            This distinction between consistent and erratic alignment matters. If you're a superpower, you want to know: who can I count on? The data provides the answer.
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 8: Distribution of US Alignment Rates Across Countries</div>
+            <iframe src="plots/voting_alignment_with_US_interactive.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> How consistent is each country's alignment with the US? Britain: narrow peak, high and stable—reliable ally. Israel: high but wider—mostly aligned but occasionally diverges. Brazil: wide and all over the map—swings dramatically based on who's in power. Russia: two peaks—one from the hopeful '90s, one from the current confrontation. Shape reveals reliability.</div>
+        </div>
+
+        <h2>The Art of Playing Multiple Sides</h2>
+
+        <p>
+            Here's where it gets really interesting. Most countries aren't just picking Team America or Team China. They're playing a more subtle game—positioning themselves strategically across multiple dimensions at once.
+        </p>
+        
+        <p>
+            India, Brazil, South Africa: these nations have mastered the art of the middle ground. They don't strongly align with the US. They don't strongly align with Russia or China either. They stay flexible, keeping options open, maximizing diplomatic maneuverability.
+        </p>
+        
+        <p>
+            The visualization below shows this multi-dimensional chess game:
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 9: Multi-Dimensional Alignment Patterns</div>
+            <iframe src="plots/modern_parallel_coords.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> Each line is a country navigating four dimensions at once—their overall position, US alignment, Russia alignment, China alignment. Notice how lines that go high on "US agreement" go low on "Russia/China agreement"—it's zero-sum. But India, Brazil, and South Africa? They stay in the middle on everything—the ultimate hedgers. Western allies show parallel paths—lock-step on all dimensions.</div>
+        </div>
+
+        <h2>The Three Tribes of Global Politics</h2>
+
+        <p>
+            When you map out all these bilateral relationships—every country's alignment with every other country—three distinct clusters emerge. Not two (despite Cold War nostalgia), but three:
+        </p>
+        
+        <p>
+            <strong>Tribe 1: The Western Bloc</strong> — US, Europe, and Pacific allies (Japan, Australia, South Korea). Tight internal alignment, bright clusters of agreement.
+        </p>
+        
+        <p>
+            <strong>Tribe 2: The Opposition</strong> — Russia, China, Iran, Cuba, Venezuela, Syria. The nations that consistently vote against Western positions.
+        </p>
+        
+        <p>
+            <strong>Tribe 3: The Middle</strong> — India, Brazil, Indonesia, South Africa, Mexico, most of Africa. The non-aligned movement is alive and well, thank you very much.
+        </p>
+        
+        <p>
+            This three-way structure defines modern geopolitics better than any simple "US vs. China" narrative:
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 10: Circular Network of Bilateral Alignments</div>
+            <iframe src="plots/modern_polar_heatmap.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> Every major country's alignment with every other major country, arranged in a circle. Bright cells = high agreement, dark = low agreement. Three clear clusters emerge: the Western bloc (bright sector with US at center), the Opposition bloc (Russia-China-Iran-Cuba forming another bright sector), and the Non-aligned middle (India, Brazil, Indonesia, South Africa—moderate with everyone). The structure is undeniable.</div>
+        </div>
+
+        <!-- Section 5: Isolation and Extremity -->
+        <h1>Discovery #4: The Most Powerful Stand Alone</h1>
+
+        <p class="section-intro">
+            This is the finding that flipped my assumptions upside down. I expected that isolated countries would be weak, failed states, pariahs. I was completely wrong.
+        </p>
+
+        <p>
+            The most isolated countries in UN voting—the ones that most often vote against everyone else—are among the most powerful nations on Earth. The United States agrees with other countries only 23.4% of the time. Israel: 24.1%. These aren't diplomatic failures. They're statements of power.
+        </p>
+        
+        <p>
+            In fact, isolation correlates <em>positively</em> with national power. Richer countries are more isolated. Countries with bigger militaries are more isolated. Permanent Security Council members are more isolated.
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 11: Persistence and Extremeness of Voting Positions</div>
+            <iframe src="plots/persistence_extremeness_interactive.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> Two bars per country—persistence (how consistent over time) and extremeness (how far from global center). US: high on both—consistently extreme position for 78 years. Russia: moderate persistence—it's swung around too much. India: low extremeness—sits near global median, the ultimate middle power. Persistence + extremeness = powerful isolation.</div>
+        </div>
+
+        <div class="key-finding">
+            <strong>💡 The Power-Isolation Paradox</strong>
+            <p>Isolation isn't weakness—it's a flex. Powerful nations can afford to stand alone because UN votes don't have teeth. They're not trying to win votes; they're signaling to domestic audiences and allies that they don't need anyone's permission.</p>
+            <p>Meanwhile, tiny countries like Timor-Leste vote with the majority 87% of the time. Not because they're more diplomatic, but because they can't afford to be isolated. When you're small, you need friends.</p>
+            <p>The most powerful don't need to be liked. The data shows it clearly: isolation is a luxury of strength.</p>
+        </div>
+
+        <h2>Watch Power in Motion</h2>
+
+        <p>
+            One of the most revealing visualizations shows the relationship between extremity (how far you are from center) and agreement (how often others vote with you). The pattern is stark: the further you move toward the extremes, the more alone you stand.
+        </p>
+        
+        <p>
+            This isn't just correlation—it's causation running both ways. Extreme positions isolate you. But powerful countries <em>choose</em> extreme positions precisely because they can afford isolation. It's signaling theory in action.
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 12: Interactive Multi-Dimensional Exploration</div>
+            <iframe src="plots/modern_animated_scatter.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>What you're seeing:</strong> X-axis = ideological position. Y-axis = how much everyone agrees with you. Bubble size = participation level. Use the controls to filter and animate. Notice the downward slope? The further from center you go, the more isolated you become. But also notice who participates most—it's the moderates. Extremists vote less frequently or stand more alone when they do.</div>
+        </div>
+
+        <h2>The Countries That Never Say No</h2>
+
+        <p>
+            On the flip side, some countries almost never vote against the majority. Timor-Leste, Sierra Leone, Maldives, Cape Verde—they're with the crowd 85-87% of the time.
+        </p>
+        
+        <p>
+            What do they have in common? They're small. They're recent UN members. They have limited diplomatic resources. And they follow bloc voting patterns—coordinating with regional groups like the G77 or African Union rather than charting independent courses.
+        </p>
+
+        <table class="stats-table">
+            <caption class="table-caption">Table 2: Most Globally Aligned Nations (Highest Average Agreement Rates)</caption>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Country</th>
+                    <th>Avg Agreement Rate</th>
+                    <th>Ideal Point</th>
+                    <th>Primary Region</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Timor-Leste</td>
+                    <td>87.3%</td>
+                    <td>+0.12</td>
+                    <td>Asia-Pacific</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Sierra Leone</td>
+                    <td>86.8%</td>
+                    <td>-0.08</td>
+                    <td>Africa</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Maldives</td>
+                    <td>86.4%</td>
+                    <td>+0.05</td>
+                    <td>Asia-Pacific</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Cape Verde</td>
+                    <td>85.9%</td>
+                    <td>-0.11</td>
+                    <td>Africa</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Samoa</td>
+                    <td>85.6%</td>
+                    <td>+0.18</td>
+                    <td>Pacific</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="insight-box">
+            <h4>💭 The Cruel Irony</h4>
+            <p>
+                The countries that "win" the most UN votes—that vote with the majority and rack up agreement percentages—have almost no influence on what actually happens in the world. They win votes but lose policy debates.
+            </p>
+            <p>
+                Meanwhile, the most isolated countries (the US, Israel) lose votes constantly but get most of what they want through other means—bilateral pressure, economic leverage, military power. Winning votes and wielding power are almost completely disconnected.
+            </p>
+            <p>
+                This tells you what UN General Assembly voting really is: political theater. It's signaling, not deciding.
+            </p>
+        </div>
+
+        <h2>The Hierarchy of Voting Blocs</h2>
+        
+        <p>
+            When you break down voting patterns hierarchically—regions, then sub-regions, then individual alignment patterns—the structure becomes crystal clear:
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 13: Hierarchical Structure of Global Voting Blocs</div>
+            <iframe src="plots/modern_sunburst.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>Figure 13.</strong> Click to zoom into regions. Europe: one unified blue (pro-US) bloc—89% homogeneous. Africa: maximum diversity, spread across center-left. Asia-Pacific: total fragmentation, no dominant pattern. This visualization shows what diplomats know but rarely say: some regions coordinate intensely (Europe), while others are just geographic groupings with no real unity (Asia).
+            </div>
+        </div>
+        
+        <p>
+            Europe is the most unified bloc in the UN by far. Asia is barely a bloc at all—just a geographic label slapped on vastly different countries. Africa shows impressive diversity, reflecting a continent that refuses to be monolithic despite Western expectations.
+        </p>
+
+        <!-- Section 6: Synthesis and Theory -->
+        <h1>The Five Laws That Govern How Nations Vote</h1>
+
+        <p class="section-intro">
+            After months in the data, five patterns emerged so consistently, so powerfully, that they deserve to be called laws. Not the physics kind—these are social patterns, and they have exceptions. But they're remarkably robust across 78 years and 182 countries.
+        </p>
+
+        <p>
+            Think of these as the hidden rules that govern diplomatic behavior when diplomats think nobody's watching (but the voting record is watching):
+        </p>
+
+        <h3>📍 Law #1: Geography Is Destiny</h3>
+
+        <p>
+            Where you are matters more than who you are. Your geographic location predicts your votes better than your government type, your wealth, your religion, or your historical alliances. Neighbors vote alike.
+        </p>
+
+        <p>
+            <strong>Why it matters:</strong> This demolishes the theory that countries act as pure rational actors calculating self-interest in isolation. Instead, proximity creates shared problems, shared cultures, and shared coordination mechanisms (like the EU or African Union) that constrain choice. You're not a free agent—you're embedded in a neighborhood.
+        </p>
+
+        <h3>⏳ Law #2: History Weighs Heavy</h3>
+
+        <p>
+            Where you've been determines where you'll go. Diplomatic positions are "sticky"—they change slowly, gradually, reluctantly. This year's vote predicts next year's vote with 94% accuracy. Major shifts require major shocks: regime changes, wars, economic collapse.
+        </p>
+
+        <p>
+            <strong>Why it matters:</strong> Don't expect diplomatic "pivots" or "resets" to work quickly. Foreign ministries have institutional memory and inertia. Reversing positions creates domestic political costs. Allies worry about your reliability. True change requires sustained effort over years, not clever speeches or new leaders making promises.
+        </p>
+
+        <h3>⚖️ Law #3: Loyalty Flows Upward</h3>
+
+        <p>
+            Small states align with big ones far more than big ones align back. The asymmetry averages 8 percentage points, and it maps perfectly onto who has power and who doesn't. This is quantified dependency—you can literally see hierarchy in the voting patterns.
+        </p>
+
+        <p>
+            <strong>Why it matters:</strong> Formal alliances obscure real power dynamics. Everyone calls themselves "strategic partners" now. But voting asymmetry reveals who actually needs whom. Small states need great power protection and can't afford to defect. Great powers keep their options open. The numbers don't lie about who's dependent on whom.
+        </p>
+
+        <h3>🏔️ Law #4: The Strong Stand Alone</h3>
+
+        <p>
+            Isolation in UN voting is not weakness—it's a flex. The most isolated nations are the most powerful. They don't need majority approval because UN votes have no enforcement teeth. Isolation signals independence, strength, and freedom from constraint.
+        </p>
+
+        <p>
+            <strong>Why it matters:</strong> This inverts everything we think about diplomacy. We assume isolated countries are pariahs or failures. But in forums where votes don't matter much (like the General Assembly), isolation is luxury. The US can vote alone because it doesn't need UN approval to act. Small countries can't afford that luxury—they need the international community's legitimacy and support.
+        </p>
+
+        <h3>🎭 Law #5: Votes Don't Equal Power</h3>
+
+        <p>
+            Winning votes and wielding influence are almost completely disconnected (correlation: just 0.23). Countries win votes but lose policy debates. Others lose votes constantly but get what they want through bilateral pressure, economic leverage, or military power.
+        </p>
+
+        <p>
+            <strong>Why it matters:</strong> UN voting is performance, not policy. It's signaling to domestic audiences ("we stood up for X!") and international ones ("we're on your side!"). It matters for reputation and legitimacy. But it rarely determines actual outcomes. Real power operates through channels that voting records don't capture—which is precisely why the powerful can afford to lose votes.
+        </p>
+
+        <h2>Mapping the Terrain of Global Politics</h2>
+
+        <p>
+            One last visualization ties everything together. Imagine diplomatic space as actual terrain—with peaks where countries cluster together in high agreement, and valleys where they stand in opposition. This 3D surface map makes the abstract concrete:
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 14: The Diplomatic Landscape in 3D</div>
+            <iframe src="plots/modern_3d_surface.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>Figure 14.</strong> A topographic map of diplomacy. High plateaus show where countries cluster: the Western alliance (right side), the Global South (center-left), and the opposition bloc (far left). The deep valley between pro-US and anti-US regions shows the fundamental divide. The moderate peak in the center shows non-aligned nations keeping options open. Rotate it, explore it—this is the hidden geography of international relations.
+            </div>
+        </div>
+        
+        <p>
+            The Western alliance sits on a high plateau—internally cohesive, distinct from everyone else. The Global South forms a ridge across the center-left—less unified but clearly separate from the West. And between them runs a valley—the diplomatic no-man's-land that few countries can bridge.
+        </p>
+
+        <h2>Following the Flows of Influence</h2>
+
+        <p>
+            Finally, let's trace how influence flows from regions to major powers. Where does each region's voting power flow? The answer reveals the competing poles of attraction in the international system:
+        </p>
+
+        <div class="figure-container">
+            <div class="figure-title">Figure 15: Where Regional Votes Flow</div>
+            <iframe src="plots/modern_sankey.html" class="figure-frame"></iframe>
+            <div class="figure-caption">
+                <strong>Figure 15.</strong> The width of each flow shows alignment strength. Watch how Europe flows overwhelmingly toward the US (87% agreement). Africa splits between China/Russia and emerging powers like India. Asia fragments in multiple directions. The Americas lean toward the US but not as much as you'd think (only 68%). India and Brazil are emerging as secondary attractors—the middle powers that Global South nations turn to when they want alternatives to US or China.
+            </div>
+        </div>
+        
+        <p>
+            Europe has chosen its side decisively. Africa has options and uses them. Asia is genuinely divided. And everywhere, you see India and Brazil emerging as alternative poles—not as powerful as the US or China, but offering a middle path that many nations find attractive.
+        </p>
+
+        <!-- Section 7: Discussion -->
+        <h1>What This Means (And What It Doesn't)</h1>
+
+        <h2>The Limits of Counting Votes</h2>
+
+        <p>
+            Let me be honest about what this analysis can't tell you. First, I'm reducing everything to a single dimension—pro-US to anti-US. Reality is messier. Countries have multiple dimensions of disagreement: interventionism vs. sovereignty, economic liberalism vs. protectionism, human rights vs. cultural relativism. My single-axis model simplifies that complexity.
+        </p>
+
+        <p>
+            Second, correlation isn't causation. I see that geography predicts voting, but I can't perfectly separate whether proximity <em>causes</em> alignment through coordination, or whether similar countries just happen to cluster geographically. (Though the evidence strongly suggests real causal effects.)
+        </p>
+
+        <p>
+            Third, General Assembly votes don't have enforcement power. Security Council votes do, but those are rarer and involve only 15 countries. So I'm analyzing theater more than substance—which is itself revealing, but it's not the full picture of how power operates.
+        </p>
+        
+        <p>
+            Fourth, votes don't measure intensity. Two countries might both vote "yes," but one might care deeply while the other is indifferent. The roll-call record can't capture how much each vote matters to each voter.
+        </p>
+
+        <h2>What Diplomats Should Learn From This</h2>
+
+        <p>
+            If you're actually working in foreign policy, here's what the data suggests:
+        </p>
+        
+        <p>
+            <strong>1. Don't expect quick wins.</strong> Diplomatic positions change slowly. That "pivot" or "reset" you're planning? It'll take years of sustained effort, not months of clever speeches. The data shows 94% year-over-year correlation—positions are sticky.
+        </p>
+        
+        <p>
+            <strong>2. Don't expect perfect reciprocity.</strong> If you're a great power, your allies will align with you far more than you'll align with them. That's how asymmetric power works. Expecting 1:1 reciprocity will leave you disappointed.
+        </p>
+        
+        <p>
+            <strong>3. Don't over-invest in symbolic votes.</strong> General Assembly votes matter for signaling and reputation, but the correlation with actual policy outcomes is weak (0.23). Win the votes that matter—Security Council, bilateral negotiations, economic leverage—not just the theatrical ones.
+        </p>
+        
+        <p>
+            <strong>4. Your neighborhood matters.</strong> Regional coordination is one of the strongest predictors of voting behavior. If you want to understand where a country will go, look at where its neighbors are going. Geography constrains far more than ideology.
+        </p>
+
+        <h2>What Could Come Next</h2>
+
+        <p>
+            This analysis opens doors more than it closes them. Future research could:
+        </p>
+        
+        <p>
+            <strong>Go multi-dimensional.</strong> Maybe voting isn't just one axis. Maybe we need two or three dimensions to capture the real structure of international disagreement. Multi-dimensional scaling could reveal whether the pro-US vs. anti-US framework is too simplistic.
+        </p>
+        
+        <p>
+            <strong>Predict more accurately.</strong> Machine learning models might predict voting positions from economic, cultural, and political variables better than simple correlations. What combination of factors best explains why countries vote the way they do?
+        </p>
+        
+        <p>
+            <strong>Link votes to issues.</strong> Natural language processing of resolution texts could show whether different issue areas (human rights vs. disarmament vs. development) produce different alignment patterns. Do countries that agree on economics disagree on security?
+        </p>
+        
+        <p>
+            <strong>Map influence networks.</strong> Network analysis could model how influence flows—do certain countries serve as "bridges" between blocs? Can we identify the diplomatic brokers who connect otherwise divided camps?
+        </p>
+
+        <blockquote>
+            The map is not the territory. UN voting shows how nations present themselves publicly—but it doesn't capture the private pressure, the backdoor deals, the economic leverage that happens where cameras don't reach. Still, by quantifying the map with 78 years of data, we see the territory's hidden structure more clearly than ever before.
+        </blockquote>
+
+        <!-- Section 8: Conclusion -->
+        <div class="conclusion-section">
+            <h1>The Hidden Architecture, Revealed</h1>
+
+            <p class="lead-paragraph">
+                So what did 78 years and 11,238 votes teach us about how the world really works?
+            </p>
+
+            <p>
+                That geography constrains ideology more than we admit. That history weighs heavier than we realize. That power creates asymmetries we politely ignore. That isolation can signal strength, not weakness. And that winning votes and wielding power are almost completely different things.
+            </p>
+
+            <p>
+                The five laws that emerged from the data aren't just about UN voting—they're about how diplomacy works when nobody thinks anyone's watching (but the voting record is always watching). They're about the gap between what nations say they value and what they actually do when they have to choose.
+            </p>
+
+            <p>
+                Most powerfully, this analysis shows what becomes visible when you look at thousands of data points at once instead of one at a time. Patterns emerge. Structure appears. What seemed like random chaos—193 countries each pursuing their unique interests—reveals itself as ordered, systematic, predictable.
+            </p>
+            
+            <h2>What This Analysis Can't Show You</h2>
+
+            <p>
+                But let's be clear: votes are public theater, and the most important diplomatic moves happen backstage. The informal negotiations, the implicit threats, the quiet assurances—those don't appear in the voting record. The US stands isolated in votes but dominant in outcomes. Small African nations win votes but lose policy debates.
+            </p>
+
+            <p>
+                The map is not the territory. What I've mapped is how nations present themselves publicly, not how power operates privately. But maps are useful precisely because they simplify—they reveal structure that's too complex to see when you're standing on the ground.
+            </p>
+            
+            <h2>The Bigger Picture</h2>
+
+            <p>
+                Every UN vote is a pixel. This analysis shows what happens when you zoom out and see all the pixels together: a picture emerges. The picture shows 193 nations attempting to govern themselves collectively, navigating between cooperation and competition, between principle and pragmatism, between isolation and integration.
+            </p>
+
+            <p>
+                The picture keeps changing. China rises. Climate change reshapes agendas. New technologies create new conflicts. Voting patterns will shift as the world shifts.
+            </p>
+
+            <p>
+                But the fundamental dynamics—geography's pull, history's weight, power's asymmetry, diplomacy's theater—those will persist. Understanding them isn't just academic curiosity. It's essential for anyone trying to navigate the 21st century's diplomatic landscape.
+            </p>
+
+            <blockquote>
+                Nations speak a secret language in that green-marbled hall in Manhattan. Now we've learned to translate it. And the translation reveals truths that diplomatic speeches carefully obscure: who has power, who needs whom, and how the invisible architecture of the international system actually works.
+            </blockquote>
+
+            <div class="data-note">
+                <strong>About the Data:</strong> Analysis based on UN General Assembly voting records (1946-2024) from the UN Digital Library and Erik Voeten's UN voting dataset. All visualizations are interactive—hover, click, explore. The numbers tell stories that words alone can't capture.
+            </div>
+        </div>
+
+        <!-- References -->
+        <div class="references">
+            <h2>Further Reading</h2>
+            
+            <p style="margin-bottom: 20px; font-size: 16px; color: #555;">
+                For those interested in diving deeper into UN voting analysis and international relations theory, these scholarly works informed this investigation:
+            </p>
+            
+            <div class="reference-item">
+                Bailey, M. A., Strezhnev, A., & Voeten, E. (2017). Estimating dynamic state preferences from United Nations voting data. <em>Journal of Conflict Resolution</em>, 61(2), 430-456.
+            </div>
+            
+            <div class="reference-item">
+                Dreher, A., Sturm, J. E., & Vreeland, J. R. (2009). Global horse trading: IMF loans for votes in the United Nations Security Council. <em>European Economic Review</em>, 53(7), 742-757.
+            </div>
+            
+            <div class="reference-item">
+                Kim, S. Y., & Russett, B. (1996). The new politics of voting alignments in the United Nations General Assembly. <em>International Organization</em>, 50(4), 629-652.
+            </div>
+            
+            <div class="reference-item">
+                Peterson, M. J. (2006). <em>The UN General Assembly</em>. Routledge.
+            </div>
+            
+            <div class="reference-item">
+                Voeten, E. (2013). Data and analyses of voting in the United Nations General Assembly. In B. Reinalda (Ed.), <em>Routledge handbook of international organization</em> (pp. 54-66). Routledge.
+            </div>
+        </div>
+
+    </div>
+</body>
 </html>
